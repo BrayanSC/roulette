@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import * as $ from 'jquery';
-import { extend } from "extend";
 
 @Component({
   selector: 'app-root',
@@ -9,37 +7,53 @@ import { extend } from "extend";
 })
 export class AppComponent implements OnInit {
   title = 'roulette';
+  private typeGame: Number;
+  private listRamdom: Number[];
+  elementsRoulette: Roulette[] = [];
 
-  test: Roulette;
-  valor: number = 0;
-  myStyles = {
-    'transform': 'translate(0px, -30px)'
-    // 'background-color': 'lime',
-    // 'font-size': '20px',
-    // 'font-weight': 'bold'
+  constructor() { 
+    this.typeGame = 3;
   }
 
-
-
-  constructor() { }
-
   startNow() {
-    this.test.start();
-    this.test.p.stopCallback
+    this.listRamdom = [];
+    this.elementsRoulette.forEach(element => {
+      const numRandom = Math.floor(Math.random() * element.p.imageCount);
+      this.listRamdom.push(numRandom);
+    });
+
+    console.log(this.listRamdom)
+    this.rollNow();
+
+  }
+
+  rollNow() {
+    this.elementsRoulette.forEach((element, index) => {
+      element.start(this.listRamdom[index]);
+    });
   }
 
   ngOnInit() {
-    this.test = new Roulette((<HTMLInputElement>document.getElementById("testRR")));
+    
+    for (let i = 0; i < this.typeGame; i++) {
+      this.elementsRoulette.push(new Roulette());
+    }
+
+    setTimeout(() => {
+      this.elementsRoulette.forEach((element, index) => {
+        index += 1;
+        element.init((<HTMLInputElement>document.getElementById("roulette" + index)));
+      });
+    }, 2000);
   }
 
 }
 
 export class Roulette {
 
-
   defaultSettings: any = {
     speed: 10, // x > 0
-    stopImageNumber: 2, // x >= 0 or null or -1
+    stopImageNumber: -1, // x >= 0 or null or -1
     // rollCount: 3, // x >= 0
     duration: 3, //(x second)	
     stopCallback: function () {
@@ -58,7 +72,7 @@ export class Roulette {
   defaultProperty = {
     $rouletteTarget: null,
     imageCount: 6,
-    originalStopImageNumber: 3,
+    originalStopImageNumber: null,
     totalHeight: 640,
     topPosition: 0,
 
@@ -76,7 +90,7 @@ export class Roulette {
   //p:any = extend({}, this.defaultSettings, this.options, this.defaultProperty);
   p: any = {
     speed: 10, //rotation speed 
-    stopImageNumber: 2, // stopImageNumber >= 0 and x <= imageCount-1
+    stopImageNumber: -1, // stopImageNumber >= 0 and x <= imageCount-1
     // rollCount: 3, // x >= 0
     duration: 3, //(x second)	
     stopCallback: () => {
@@ -89,8 +103,8 @@ export class Roulette {
 
     },
     element: null,
-    imageCount: 6,
-    originalStopImageNumber: 3,
+    imageCount: null,
+    originalStopImageNumber: null,
     totalHeight: 640,//imageHeight*imageCount
     topPosition: 0,
 
@@ -107,14 +121,18 @@ export class Roulette {
   };
 
 
-  constructor(element: any) {
+  constructor() {
+
+  }
+  init(element: any) {
     this.p.element = element;
-    this.p.element.style.transform = 'translate(0px, -0px)';
-    this.p.imageCount = element.children.length
+    // this.p.element.style.transform = 'translate(0px, -0px)';
+    this.p.imageCount = element.children.length - 1;
   }
 
-  start() {
-    this.p.stopImageNumber = (this.defaultProperty.originalStopImageNumber) && (this.defaultProperty.originalStopImageNumber) >= 0 ?
+  start(num: Number) {
+    this.defaultProperty.originalStopImageNumber = num;
+    this.p.stopImageNumber = this.defaultProperty.originalStopImageNumber >= 0 ?
       this.defaultProperty.originalStopImageNumber : Math.floor(Math.random() * this.p.imageCount);
     this.p.isStop = false;//for diseable button run
 
@@ -165,9 +183,10 @@ export class Roulette {
 
   slowDownSetup() {
 
-    if (this.p.isSlowdown) {
-      return;
-    }
+    //This is for add event STOP rotation stop
+    // if (this.p.isSlowdown) {
+    //   return;
+    // }
     this.p.isSlowdown = true;
     this.p.slowDownStartDistance = this.p.distance;
     this.p.maxDistance = this.p.distance + (2 * this.p.totalHeight);
