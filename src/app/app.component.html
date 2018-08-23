@@ -1,28 +1,46 @@
+{{valido}} {{cont}}
+<div class="container-fluid" id="SumID{{2+2}}">
 
-      <div class="container-fluid" id="SumID{{2+2}}">
+  <div class="row  justify-content-md-center">
+    <div *ngFor="let element of elementsRoulette; let i = index" class="">
+      <div class="roulette_container">
+        <div class="roulette roulette-inner responsive-img" id="roulette{{i+1}}" style="overflow: hidden; height: 128px;">
+          <div class="roulette-inner"  style="position: relative; top: 0px; transform: translate(0px, 0px)">
+            <img *ngFor="let image of images" src="{{image.img}}" class="img-thumb center" style="display: block;" />
+            <img *ngIf="images.length > 0" src="{{images[0].img}}" class="img-thumb center" style="display: block;" />
 
-        <div class="row  justify-content-md-center">
-          <div *ngFor="let element of elementsRoulette; let i = index" class="">
-            <div class="roulette_container">
-              <div class="roulette roulette-inner responsive-img" style="overflow: hidden; height: 128px;">
-                <div class="roulette-inner" id="roulette{{i+1}}" style="position: relative; top: 0px; transform: translate(0px, 0px)">
-                  <img src="assets/img/star.png" style="display: block;" />
-                  <img src="assets/img/flower.png" style="display: block;" />
-                  <img src="assets/img/coin.png" style="display: block;" />
-                  <img src="assets/img/mshroom.png" style="display: block;" />
-                  <img src="assets/img/chomp.png" style="display: block;" />
-                  <img src="assets/img/star.png" style="display: block;" />
-                </div>
-              </div>
-            </div>
           </div>
-
         </div>
-
       </div>
+    </div>
 
-      <div class="btn_container">
-        <p>
-          <button (click)="startNow()" class="btn btn-large btn-primary start"> START </button>
-        </p>
-      </div>
+  </div>
+
+</div>
+
+<div class="btn_container">
+  <p>
+    <button (click)="startNow()" class="btn btn-large btn-primary start" [disabled]="!isTotalStop"> START </button>
+  </p>
+</div>
+
+<div *ngIf="typeGame == 1">
+
+  <div *ngIf="showAlertImageSelected" class="alert alert-danger text-center" role="alert">
+    Select One
+  </div>
+  <div *ngIf="statusGames && isTotalStop" class="alert alert-success text-center" role="alert">
+      You Win
+    </div>
+  <div class="row justify-content-md-center">
+    <span class="image_sample">
+      <img *ngFor="let image of images; let i = index" [ngClass]="{'opacity': imageSelected != i}" (click)="imageSelection(i)"
+        src="{{image.img}}" />
+    </span>
+  </div>
+
+
+</div>
+
+{{contWin}}
+{{contLose}}

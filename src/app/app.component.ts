@@ -6,37 +6,45 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'roulette';
-  private typeGame: Number;
+  title = 'Roulette';
+  statusGames:boolean;
+  typeGame: Number;
+  readyPage = false;
+  isTotalStop: boolean;
+  contStop: number;
+  contWin: number = 0;
+  contLose: number = 0;
+
+  //BEGIN for typeGame == 1
+  imageSelected: Number;
+  showAlertImageSelected: Boolean;
+  //END for typeGame == 1
+
   private listRamdom: Number[];
+
   elementsRoulette: Roulette[] = [];
+  images: any[] = [
+    { img: "assets/img/seven.png" },
+    { img: "assets/img/money.png" },
+    { img: "assets/img/heart.png" },
+    { img: "assets/img/dragon.png" },
+    { img: "assets/img/dice.png" },
+    { img: "assets/img/chip.png" },
+    { img: "assets/img/clubs.png" }
+  ];
 
-  constructor() { 
-    this.typeGame = 3;
+
+  constructor() {
+    this.typeGame = 1;
   }
 
-  startNow() {
-    this.listRamdom = [];
-    this.elementsRoulette.forEach(element => {
-      const numRandom = Math.floor(Math.random() * element.p.imageCount);
-      this.listRamdom.push(numRandom);
-    });
-
-    console.log(this.listRamdom)
-    this.rollNow();
-
-  }
-
-  rollNow() {
-    this.elementsRoulette.forEach((element, index) => {
-      element.start(this.listRamdom[index]);
-    });
-  }
 
   ngOnInit() {
-    
+    this.statusGames = false;
+    this.contStop = 0
+    this.isTotalStop = true;
     for (let i = 0; i < this.typeGame; i++) {
-      this.elementsRoulette.push(new Roulette());
+      this.elementsRoulette.push(new Roulette(this));
     }
 
     setTimeout(() => {
@@ -44,7 +52,83 @@ export class AppComponent implements OnInit {
         index += 1;
         element.init((<HTMLInputElement>document.getElementById("roulette" + index)));
       });
-    }, 2000);
+
+    }, 1000);
+  }
+
+  validateSelection() {
+    this.showAlertImageSelected = this.imageSelected >= 0 ? false : true
+    if (!this.showAlertImageSelected) {
+      this.rollNow();
+    }
+
+  }
+
+  imageSelection(indexImg: Number) {
+    this.imageSelected = indexImg >= 0 ? indexImg : -1
+  }
+
+  startNow() {
+    this.typeGame != 1 ? this.rollNow() : this.validateSelection()
+  }
+
+  rollNow() {
+    this.statusGames = false;
+    this.isTotalStop = false;
+    this.listRamdom = [];
+    for (let i = 0; i < this.elementsRoulette.length; i++) {
+
+      const numRandom = Math.floor(Math.random() * this.elementsRoulette[i].p.imageCount);
+      this.listRamdom.push(numRandom);
+      this.elementsRoulette[i].start(this.listRamdom[i]);
+    }
+
+    this.statusGame()
+    // console.log(this.listRamdom);
+
+  }
+
+
+  isTotalStopRoll() {
+    this.contStop++;
+    if (this.contStop === this.elementsRoulette.length) {
+      this.isTotalStop = true;
+      this.contStop = 0;
+    }
+  }
+
+  statusGame() {
+    switch (this.typeGame) {
+      case 1:
+        this.winGameOneValidation();
+        break;
+      case 2:
+        // this.winGameTwoValidation();
+        break;
+      case 3:
+        this.winGameManyValidation();
+        break;
+      default:
+        break;
+
+    }
+
+  }
+
+  winGameManyValidation() {
+    throw new Error("Method not implemented.");
+  }
+  winGameTwoValidation() {
+    throw new Error("Method not implemented.");
+  }
+
+  winGameOneValidation() {
+    if (this.listRamdom[0] === this.imageSelected) {
+      this.contWin++;
+      this.statusGames = true;
+    } else {
+      this.contLose++;
+    }
   }
 
 }
@@ -63,38 +147,23 @@ export class Roulette {
     slowDownCallback: function () {
     }
   }
+  //exaple object of config
   options: any = {
     speed: 10,
     duration: 10,
     stopImageNumber: 2
   };
 
-  defaultProperty = {
-    $rouletteTarget: null,
-    imageCount: 6,
-    originalStopImageNumber: null,
-    totalHeight: 640,
-    topPosition: 0,
 
-    maxDistance: null,
-    slowDownStartDistance: null,
+  this: any;//father this
 
-    isSpeedUp: true,
-    isSlowdown: false,
-    isStop: true,
-
-    distance: 0,
-    runUpDistance: 256
-  };
-
-  //p:any = extend({}, this.defaultSettings, this.options, this.defaultProperty);
   p: any = {
-    speed: 10, //rotation speed 
+    speed: 15, //rotation speed 
     stopImageNumber: -1, // stopImageNumber >= 0 and x <= imageCount-1
     // rollCount: 3, // x >= 0
-    duration: 3, //(x second)	
+    duration: 1, //(x second)	
     stopCallback: () => {
-      //
+      this.this.isTotalStopRoll();
     },
     startCallback: () => {
 
@@ -105,36 +174,39 @@ export class Roulette {
     element: null,
     imageCount: null,
     originalStopImageNumber: null,
-    totalHeight: 640,//imageHeight*imageCount
+    totalHeight: null,//imageHeight*imageCount
     topPosition: 0,
 
     maxDistance: null,
     slowDownStartDistance: null,
 
     isSpeedUp: true,
-    isSlowdown: false,
+    isSpeedDown: false,
     isStop: true,
-    imageHeight: 128,//size img height
+    imageHeight: null,//size img height
     distance: 0,
-    runUpDistance: 256//imageHeight*2
+    runUpDistance: null//imageHeight*2
 
   };
 
-
-  constructor() {
-
+  constructor(th: any) {
+    this.this = th;
   }
+
   init(element: any) {
     this.p.element = element;
-    // this.p.element.style.transform = 'translate(0px, -0px)';
-    this.p.imageCount = element.children.length - 1;
+    this.p.imageCount = element.children[0].children.length - 1;
+    this.p.imageHeight = parseFloat(element.style.height);
+    this.p.totalHeight = this.p.imageCount * this.p.imageHeight;
+    this.p.runUpDistance = this.p.imageHeight * 2;
+    console.log(this.p)
+
   }
 
   start(num: Number) {
-    this.defaultProperty.originalStopImageNumber = num;
-    this.p.stopImageNumber = this.defaultProperty.originalStopImageNumber >= 0 ?
-      this.defaultProperty.originalStopImageNumber : Math.floor(Math.random() * this.p.imageCount);
-    this.p.isStop = false;//for diseable button run
+    this.p.stopImageNumber = num >= 0 ?
+      num : Math.floor(Math.random() * this.p.imageCount);
+    this.p.isStop = false;
 
     setTimeout(() => {
       this.slowDownSetup();
@@ -155,7 +227,7 @@ export class Roulette {
       } else {
         this.p.isSpeedUp = false;
       }
-    } else if (this.p.isSlowdown) {
+    } else if (this.p.isSpeedDown) {
       let _rate = ~~(((this.p.maxDistance - this.p.distance) / (this.p.maxDistance - this.p.slowDownStartDistance)) * (this.p.speed));
       _speed = _rate + 1;
     }
@@ -173,7 +245,7 @@ export class Roulette {
       this.p.topPosition = this.p.topPosition - this.p.totalHeight;
     }
 
-    this.p.element.style.transform = 'translate(0px, ' + this.p.topPosition * -1 + 'px)';
+    this.p.element.children[0].style.transform = 'translate(0px, ' + this.p.topPosition * -1 + 'px)';
 
     if (!this.p.isStop) {
       setTimeout(() => { this.roll() }, 1);
@@ -184,10 +256,10 @@ export class Roulette {
   slowDownSetup() {
 
     //This is for add event STOP rotation stop
-    // if (this.p.isSlowdown) {
+    // if (this.p.isSpeedDown) {
     //   return;
     // }
-    this.p.isSlowdown = true;
+    this.p.isSpeedDown = true;
     this.p.slowDownStartDistance = this.p.distance;
     this.p.maxDistance = this.p.distance + (2 * this.p.totalHeight);
     this.p.maxDistance += this.p.imageHeight - this.p.topPosition % this.p.imageHeight;
@@ -199,18 +271,18 @@ export class Roulette {
   }
 
   reset() {
-    this.p.maxDistance = this.defaultProperty.maxDistance;
-    this.p.slowDownStartDistance = this.defaultProperty.slowDownStartDistance;
-    this.p.distance = this.defaultProperty.distance;
-    this.p.isSpeedUp = this.defaultProperty.isSpeedUp;
-    this.p.isSlowdown = this.defaultProperty.isSlowdown;
-    this.p.isStop = this.defaultProperty.isStop;
-    this.p.topPosition = this.defaultProperty.topPosition;
+    this.p.maxDistance = 0;
+    this.p.slowDownStartDistance = 0;
+    this.p.distance = 0;
+    this.p.isSpeedUp = true;
+    this.p.isSpeedDown = false;
+    this.p.isStop = false;
+    this.p.topPosition = 0;
   }
 
   //This method is for add event STOP rotation.
   // stop(option) {
-  //   if (!this.p.isSlowdown) {
+  //   if (!this.p.isSpeedDown) {
   //     if (option) {
   //       let stopImageNumber = Number(option.stopImageNumber);
   //       if (0 <= stopImageNumber && stopImageNumber <= (this.p.imageCount - 1)) {

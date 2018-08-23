@@ -3,11 +3,10 @@ body {
 	padding-bottom: 40px;
 }
 div.roulette {
-	/* margin-top: 35px; */
+	margin: auto;
 }
 div.roulette-inner {
-	left : auto;
-	right: auto;
+	margin: auto;
 }
 
 
@@ -16,7 +15,8 @@ div.roulette_container {
 	width:auto;
 	height:128px;
 	border:1px solid rgba(253, 252, 253, 0.31);
-	box-shadow:0px 0px 3px lightpink;margin:auto;
+	box-shadow:0px 0px 3px lightpink;
+	margin:auto;
 }
 
 .btn_container {
@@ -27,3 +27,15 @@ div.roulette_container {
 	margin-right:20px;
 }
 
+.img-thumb {
+	max-height: 128px;
+	min-width: 130px;
+}
+
+.image_sample img{
+	width : 50px;
+	cursor: pointer;
+}
+.opacity{
+	opacity: 0.2;
+}
